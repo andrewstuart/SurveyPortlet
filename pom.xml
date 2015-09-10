@@ -8,11 +8,11 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    
-    <groupId>org.jasig.ssp</groupId>
+
+    <groupId>org.jasig.portlet</groupId>
     <artifactId>survey-portlet</artifactId>
-    <version>1.0-SNAPSHOT</version>
-            
+    <version>1.0.0-SNAPSHOT</version>
+
     <name>${project.artifactId}</name>
     <description>Portlet for creating and administering survey/questionnaires</description>
     <packaging>war</packaging>
@@ -20,7 +20,7 @@
     <!-- Dependency Version Properties -->
     <properties>
         <env>local</env>
-        <filters.file>../../filters/${env}.properties</filters.file>
+        <filters.file>src/main/filters/${env}.properties</filters.file>
         <commons-lang.version>2.6</commons-lang.version>
         <hibernate.version>4.3.8.Final</hibernate.version>
         <hsqldb.version>2.3.2</hsqldb.version>
@@ -31,14 +31,14 @@
         <portlet-api.version>2.0</portlet-api.version>
         <slf4j.version>1.7.5</slf4j.version>
         <servlet-api.version>3.0.1</servlet-api.version>
-        <spring.version>4.1.5.RELEASE</spring.version>        
+        <spring.version>4.1.6.RELEASE</spring.version>
         <spring-data.version>1.7.2.RELEASE</spring-data.version>
         <spring-security.version>4.0.0.RELEASE</spring-security.version>
         <!-- The JDBC Driver used by db-init -->
         <jdbc.groupId>org.postgresql</jdbc.groupId>
         <jdbc.artifactId>postgresql</jdbc.artifactId>
         <jdbc.version>9.3-1102-jdbc41</jdbc.version>  <!-- If using hsql must match hsqldb.version -->
-        
+
         <!-- use this instead for postgress
         <jdbc.groupId>org.postgresql</jdbc.groupId>
         <jdbc.artifactId>postgresql</jdbc.artifactId>
@@ -247,6 +247,21 @@
                 <artifactId>${jdbc.artifactId}</artifactId>
                 <version>${jdbc.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>angularjs</artifactId>
+                <version>1.4.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>underscorejs</artifactId>
+                <version>1.8.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>angular-mocks</artifactId>
+                <version>1.4.3</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -407,6 +422,21 @@
             <artifactId>jsondoc-springmvc</artifactId>
             <version>1.1.13</version>
         </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>angularjs</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>underscorejs</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>angular-mocks</artifactId>
+            <version>1.4.3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -566,7 +596,7 @@
                     <hibernatetool>      
                         <jpaconfiguration persistenceunit="SurveyPU" 
                                           propertyFile="target/${project.build.finalName}/WEB-INF/classes/datasource.properties" />
-                        <hbm2ddl export="true" create="true" drop="true"/>             
+                        <hbm2ddl export="true" create="true" drop="true" outputfilename="sql.ddl"  haltonerror="true"/>
                         <classpath>
                             <path location="target/${project.build.finalName}/WEB-INF/classes" />
                         </classpath>
@@ -632,6 +662,13 @@
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>javax.servlet-api</artifactId>
+                        <version>${servlet-api.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -734,6 +771,60 @@
                     </dependency>
                 </dependencies>
 		    </plugin>
+            <!--
+            <plugin>
+                <groupId>com.github.klieber</groupId>
+                <artifactId>phantomjs-maven-plugin</artifactId>
+                <version>0.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <version>1.9.2</version>
+                </configuration>
+            </plugin>
+            -->
+            <plugin>
+                <groupId>com.github.searls</groupId>
+                <artifactId>jasmine-maven-plugin</artifactId>
+                <version>2.0-beta-02</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsSrcDir>${project.basedir}/src/main/webapp/js</jsSrcDir>
+                    <jsTestSrcDir>${project.basedir}/src/test/webapp/js</jsTestSrcDir>
+                    <preloadSources>
+                        <source>/webjars/angularjs/angular.js</source>
+                        <source>/webjars/underscorejs/underscore.js</source>
+                        <source>/webjars/angular-mocks/angular-mocks.js</source>
+                    </preloadSources>
+                    <sourceIncludes>
+                        <include>*.js</include>
+                    </sourceIncludes>
+                    <specIncludes>
+                        <include>*Spec.js</include>
+                    </specIncludes>
+<!--
+                    <webDriverClassName>org.openqa.selenium.phantomjs.PhantomJSDriver</webDriverClassName>
+                    <webDriverCapabilities>
+                        <capability>
+                            <name>phantomjs.binary.path</name>
+                            <value>${phantomjs.binary}</value>
+                        </capability>
+                    </webDriverCapabilities>
+-->
+                    <haltOnFailure>true</haltOnFailure>
+                </configuration>
+            </plugin>
 <!--  
 Left here as an example of how to use jetty to stand up the portlet in order to access the services.
 Run Jetty with: mvn -Djetty.port=9090 jetty:run-war >& mavenJetty.log &

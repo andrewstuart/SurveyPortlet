@@ -1,19 +1,19 @@
 <%--
 
-    Licensed to Jasig under one or more contributor license
+    Licensed to Apereo under one or more contributor license
     agreements. See the NOTICE file distributed with this work
     for additional information regarding copyright ownership.
-    Jasig licenses this file to you under the Apache License,
+    Apereo licenses this file to you under the Apache License,
     Version 2.0 (the "License"); you may not use this file
-    except in compliance with the License. You may obtain a
-    copy of the License at:
+    except in compliance with the License.  You may obtain a
+    copy of the License at the following location:
 
-    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on
-    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied. See the License for the
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
     specific language governing permissions and limitations
     under the License.
 
@@ -165,6 +165,11 @@
                                 <input class="form-control" ng-model="a.answer[k]" type="text" id="{{k}}" placeholder="{{k}}">
                             </div>
                         </div>
+
+                        <div class="form-group form-group-sm">
+                          <label class="col-sm-2 control-label" for="value-{{$index}}">Value</label>
+                          <input class="form-control" ng-model="a.value" id="value-{{$index}}">
+                        </div>
                     </div>
                     <a ng-click="addA(q.question)" class="btn btn-sm btn-success">Add Answer</a>
                 </div>
@@ -186,7 +191,7 @@
 
 <script id="survey-portlet-script" src="${pageContext.request.contextPath}/js/app.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
-    window.up.startSurveyPortlet(window, window.underscore || up._, {
+    window.up.startSurveyPortlet(window, up._ || window._ || window.underscore, {
         n: '${n}'
     });
 </script>

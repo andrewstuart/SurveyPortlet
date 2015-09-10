@@ -1,18 +1,18 @@
 /**
- * Licensed to Jasig under one or more contributor license
+ * Licensed to Apereo under one or more contributor license
  * agreements. See the NOTICE file distributed with this work
  * for additional information regarding copyright ownership.
- * Jasig licenses this file to you under the Apache License,
+ * Apereo licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a
- * copy of the License at:
+ * except in compliance with the License.  You may obtain a
+ * copy of the License at the following location:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -26,12 +26,7 @@ import java.util.Set;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.jasig.portlet.survey.service.jpa.repo.JpaAnswerRepository;
-import org.jasig.portlet.survey.service.jpa.repo.JpaQuestionAnswerRepository;
-import org.jasig.portlet.survey.service.jpa.repo.JpaQuestionRepository;
-import org.jasig.portlet.survey.service.jpa.repo.JpaSurveyQuestionRepository;
-import org.jasig.portlet.survey.service.jpa.repo.JpaSurveyRepository;
-import org.jasig.portlet.survey.service.jpa.repo.JpaSurveyTextRepository;
+import org.jasig.portlet.survey.service.jpa.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +46,12 @@ class JpaSurveyDao implements IJpaSurveyDao {
 
     @Autowired
     private JpaSurveyRepository surveyRepository;
+
+    @Autowired
+    private JpaResponseRepository responseRepository;
+
+    @Autowired
+    private JpaResponseAnswerRepository responseAnswerRepository;
 
     @Autowired
     private JpaSurveyTextRepository surveyTextRepository;
@@ -131,6 +132,12 @@ class JpaSurveyDao implements IJpaSurveyDao {
         return question;
     }
 
+    @Override
+    public JpaAnswer getAnswer(Long id) {
+        JpaAnswer answer = answerRepository.findOne(id);
+        return answer;
+    }
+
     /**
      * Search for a JpaSurvey based on the specified id.
      * 
@@ -199,14 +206,43 @@ class JpaSurveyDao implements IJpaSurveyDao {
     @Override
     public JpaQuestion updateQuestion(JpaQuestion question) {
         setupQuestionForSave( question, false);
-        JpaQuestion updatedQuestion = questionRepository.save(question);
-        return updatedQuestion;
+        return questionRepository.save(question);
     }
 
     @Override
     public JpaSurvey updateSurvey(JpaSurvey survey) {
-        JpaSurvey newSurvey = surveyRepository.save(survey);
-        return newSurvey;
+        return surveyRepository.save(survey);
     }
 
+    @Override
+    public JpaResponse createResponse(JpaResponse jpaResponse) {
+        return responseRepository.save(jpaResponse);
+    }
+
+    @Override
+    public JpaResponse getResponse(long id) {
+        return responseRepository.findOne(id);
+    }
+
+    @Override
+    public List<JpaResponse> getResponseByUser(String user) {
+        Iterable<JpaResponse> responseIter = responseRepository.findByUser(user);
+        return IteratorUtils.toList(responseIter.iterator());
+    }
+
+    @Override
+    public JpaResponse getResponseByUserAndSurvey(String user, long surveyId) {
+        Iterable<JpaResponse> responseIter = responseRepository.findByUserAndSurvey(user, surveyId);
+        return responseIter.iterator().hasNext() ? responseIter.iterator().next() : null;
+    }
+
+    @Override
+    public JpaResponse updateResponse(JpaResponse jpaResponse) {
+        return responseRepository.save(jpaResponse);
+    }
+
+    @Override
+    public List<JpaResponse> getResponseBySurvey(Long surveyId) {
+        return responseRepository.findBySurvey(surveyId);
+    }
 }

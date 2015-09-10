@@ -1,3 +1,21 @@
+/*
+ * Licensed to Apereo under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Apereo licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License.  You may obtain a
+ * copy of the License at the following location:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 window.up = window.up || {};
 
 window.up.startSurveyPortlet = function(window, _, params) {
@@ -7,7 +25,7 @@ window.up.startSurveyPortlet = function(window, _, params) {
     var n = params.n;
 
     var MODULE_NAME = n + '-survey-portlet';
-    var USER = 'admin';
+    var USER = params.user;
 
     if (!window.angular) {
         var ANGULAR_SCRIPT_ID = 'angular-uportal-script';
@@ -176,7 +194,8 @@ app
 .service('StudentProfile', ["$http", "$q", "$timeout", function($http, $q, $timeout) {
     var sp = this;
 
-    var PROFILE_ROOT = 'https://portal-mock-api-dev.herokuapp.com/api/';
+    //var PROFILE_ROOT = 'https://portal-mock-api-dev.herokuapp.com/api/';
+    var PROFILE_ROOT = '/survey-portlet/v1/surveys/';
 
     /**
      * @ngdoc
@@ -191,7 +210,7 @@ app
      */
     sp.get = function(endpoint, cfg) {
         var deferred = $q.defer();
-        if (!endpoint) { 
+        if (!endpoint) {
             $timeout(function() {
                 deferred.reject('Missing endpoint for StudentProfile.get');
             });
@@ -217,7 +236,7 @@ app
         cfg = cfg || {};
         data = data || {};
 
-        var verb = data.id ? 'POST' : 'PUT';
+        var verb = data.id ? 'PUT' : 'POST';
         var url = PROFILE_ROOT + endpoint + (data.id ? '/' + data.id : '');
 
         $http(_.defaults({
@@ -310,6 +329,15 @@ app.service('SurveyMeta', ["$http", "$filter", "$q", function($http, $filter, $q
         });
     };
 
+    sm.getSurveyByName = function(name) {
+        return $http.get(root + "surveyByName/" + name)
+        .success(function(survey) {
+            sm.surveysById[survey.id] = survey;
+            sm.surveys.push(survey);
+            return survey;
+        });
+    };
+
     /**
      * @ngdoc
      * @methodOf cccPortal.service:SurveyMeta
@@ -325,6 +353,17 @@ app.service('SurveyMeta', ["$http", "$filter", "$q", function($http, $filter, $q
             lastUpdateDate: (new window.Date()).getTime()
         });
 
+        survey = $http({
+            method: method,
+            url: url,
+            data: survey})
+        .success(function(survey) {
+            sm.surveysById[survey.id] = survey;
+            sm.surveys.push(survey);
+            return survey;
+        });
+
+        survey = sm.getSurveyByName(survey.canonicalName);
 
         var requests = [];
         requests.push($http({
@@ -361,7 +400,8 @@ app.service('SurveyMeta', ["$http", "$filter", "$q", function($http, $filter, $q
             altText: null,
             imgHeight: 0,
             imgWidth: 0
-        }
+        },
+        value: 0
     };
 
     /**
@@ -438,9 +478,13 @@ app
      * # SurveyCtrl
      * Controller of the ngPortalApp
      */
-
+    var survey;
     $scope.surveys = SurveyMeta.surveys;
-    SurveyMeta.getSurveys();
+    if (surveyName) {
+        survey = SurveyMeta.getSurveyByName(surveyName);
+    } else {
+        SurveyMeta.getSurveys();
+    }
 
     $scope.toggle = function(o) {
         o = o || {};
@@ -451,30 +495,37 @@ app
     StudentProfile.get('surveyAnswers', {
         params: {
             user: USER,
+            survey: survey.id
         }
-    }).then(function success(d) {
-        if (d && d.length && d[0].answers && d[0].answers.length) {
-            _.each(d[0].answers, function(ans) {
-                $scope.surveyData[ans.question] = ans.answer;
-            });
-            $scope.surveyData.id = d[0].id;
+    }).then(function success(d, survey) {
+        console.log(d);
+        console.log(survey);
+        if (d && d.length) {
+            for (var i = 0; i < d.length; i++) {
+                if (d[i].survey == survey.id) {
+                    _.each(d[i].answers, function(ans) {
+                        $scope.surveyData[ans.question] = ans.answer;
+                    });
+                    $scope.surveyData.id = d[i].id;
+                }
+            }
         }
     });
 
-    $scope.saveAnswers = function(answers) {
+    $scope.saveAnswers = function(answers, survey) {
         delete answers.user;
 
         var data = {
             answers: _.chain(answers)
-            .filter(function(a, q) {
-                return q != 'id';
-            }).map(function(a, q) {
-                return {question: q, answer: a};
+            .omit('id')
+            .pairs()
+            .map(function(e) {
+                return {question: Number(e[0]), answer: e[1]};
             }).value(),
             id: answers.id,
-            user: USER
+            user: USER,
+            survey: survey.id
         };
-
         StudentProfile.save('surveyAnswers', data)
         .then(function success(savedAnswers) {
             answers.id = savedAnswers.id;

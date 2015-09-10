@@ -1,17 +1,20 @@
-/*
- * Copyright 2015 Jasig.
+/**
+ * Licensed to Apereo under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Apereo licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License.  You may obtain a
+ * copy of the License at the following location:
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.jasig.portlet.survey.security.uportal;
 
@@ -43,9 +46,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public final class UPortalSecurityFilter implements RenderFilter {
 
-    public static final String ROLE_ADMIN = "ROLE_ADMIN";
-    public static final String ROLE_USER = "ROLE_USER";
-    
+    public static final String ROLE_SURVEY_ADMIN = "ROLE_SURVEY_ADMIN";
+    public static final String ROLE_SURVEY_USER = "ROLE_SURVEY_USER";
+
     public static final String AUTHENTICATION_TOKEN_KEY
             = UPortalSecurityFilter.class.getName() + ".GRANTED_AUTHORITIES_KEY";
     public static final Object SSP_OWNER = "SSP";
@@ -81,12 +84,12 @@ public final class UPortalSecurityFilter implements RenderFilter {
 
         boolean isSurveyAdmin = req.isUserInRole("survey-admin");
         if (isSurveyAdmin) {
-            authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+            authorities.add(new SimpleGrantedAuthority(ROLE_SURVEY_ADMIN));
         }
 
         boolean isSurveyUser = req.isUserInRole("survey-user");
         if (isSurveyUser) {
-            authorities.add(new SimpleGrantedAuthority(ROLE_USER));
+            authorities.add(new SimpleGrantedAuthority(ROLE_SURVEY_USER));
         }
 
         logger.debug("Setting up GrantedAutorities for user '{}' -- {}",

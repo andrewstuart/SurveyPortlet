@@ -1,18 +1,18 @@
 /**
- * Licensed to Jasig under one or more contributor license
+ * Licensed to Apereo under one or more contributor license
  * agreements. See the NOTICE file distributed with this work
  * for additional information regarding copyright ownership.
- * Jasig licenses this file to you under the Apache License,
+ * Apereo licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a
- * copy of the License at:
+ * except in compliance with the License.  You may obtain a
+ * copy of the License at the following location:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -21,13 +21,7 @@ package org.jasig.portlet.survey.service.jpa;
 import org.jasig.portlet.survey.mvc.service.JpaSurveyDataService;
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.Type;
 
@@ -49,10 +43,20 @@ public class JpaAnswer implements Serializable {
     @Type(type = "org.hibernate.type.TextType")
     @Column(name = "HELP_TEXT", nullable = true)
     private String helpText;
-    
+
+    @SequenceGenerator(
+            name = JpaSurveyDataService.TABLENAME_PREFIX + "ANSWER_GEN",
+            sequenceName = JpaSurveyDataService.TABLENAME_PREFIX + "ANSWER_SEQ",
+            allocationSize = 5
+    )
+    @TableGenerator(
+            name = JpaSurveyDataService.TABLENAME_PREFIX + "ANSWER_GEN",
+            pkColumnValue = JpaSurveyDataService.TABLENAME_PREFIX + "ANSWER",
+            allocationSize = 5
+    )
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "ID", nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = JpaSurveyDataService.TABLENAME_PREFIX + "ANSWER_GEN")
+    @Column(name = "ID", updatable = false)
     private long id;
 
     @Column(name = "IMG_HEIGHT", nullable = true)
